@@ -4,7 +4,7 @@
 | Curveball | 2018/06/18 | Kevin  | Demo version |
 
 # Table Of Contents
-- 1.0 GENERAL INFORMATION  
+- 1.0 General Informaion
   - 1.1 What is AWS IoT Core
   - 1.2 What is AWS IoT Button 
   - 1.3 What is MQTT
