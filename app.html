@@ -1,0 +1,214 @@
+<html>
+
+<head>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    td,
+    th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+    
+    th {
+      background-color: #dddddd;
+    }
+    /* tr:nth-child(even) {
+      background-color: #dddddd;
+    } */
+
+    #div1 {
+      float: left;
+      margin-right: 40px;
+    }
+
+    #div2 {
+      float: left;
+      margin-right: 40px;
+    }
+
+    #div3 {
+      float: left;
+      margin-right: 40px;
+    }
+  </style>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <base href="/">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!-- <script language="JavaScript" type='text/javascript' src='/javascripts/jquery-3.1.1.min.js'></script> -->
+  <!-- <script language="JavaScript" type='text/javascript' src="/jquery-ui-1.12.1/jquery-ui.js"></script> -->
+  <link rel="stylesheet" type='text/html' href="./App/public/jquery-ui-1.12.1/jquery-ui.css">
+
+  <script>
+    function refreshLink(p) {
+      $('#link-table tbody td').remove();
+      $('#lockstatus-table tbody td').remove();
+      $('#app-link-table tbody td').remove();
+
+      for (const clientID in p) {
+        let status = p[clientID].STATUS;
+
+        let $row1 = $(`<tr>` +
+          `<td>` + clientID + `</td>` +
+          `<td><button type="button" id="` + clientID + `-open" class="open" onclick="sendStatus(['` + clientID +
+          `', 'open'])">Open Door</button></td>` +
+          `<td><button type="button" id="` + clientID + `-close" class="close" onclick="sendStatus(['` + clientID +
+          `', 'close'])">Close Door</button></td>` +
+          // '<td><button type="button" id="link-open" onclick="sendStatus(["' + clientID + '", "open"])">Open Door</button></td>' +
+          // '<td><button type="button" id="link-close" onclick="sendStatus(["' + clientID + '", "close"])">Close Door</button></td>' +
+          `</tr>`);
+        $('#link-table> tbody:last').append($row1);
+
+        let $row2 = $(`<tr>` +
+          `<td>` + clientID + `</td>` +
+          `<td>` + status + `</td>` +
+          `</tr>`);
+        $('#lockstatus-table> tbody:last').append($row2);
+
+        let $row3 = $(`<tr>` +
+          `<td><option value="` + clientID + `">` + clientID + `</option></td>` +
+          `<td><button type="button" id="` + clientID + `-open" class="open" onclick="sendStatus(['` + clientID +
+          `', 'open'])">Open Door</button></td>` +
+          `<td><button type="button" id="` + clientID + `-close" class="close" onclick="sendStatus(['` + clientID +
+          `', 'close'])">Close Door</button></td>` +
+          `</tr>`);
+        $('#app-link-table> tbody:last').append($row3);
+
+        if (status === 'open') {
+          $(`[id=` + clientID + `-open]`).prop('disabled', true);
+          $(`[id=` + clientID + `-close]`).prop('disabled', '');
+        } else if (status === 'close') {
+          $(`[id=` + clientID + `-open]`).prop('disabled', '');
+          $(`[id=` + clientID + `-close]`).prop('disabled', true);
+        } else {
+          $(`[id=` + clientID + `-open]`).prop('enabled', '');
+          $(`[id=` + clientID + `-close]`).prop('enabled', '');
+        }
+      }
+    }
+
+    function getLink() {
+      $.get('/appApi/getLink', {}, (data, status) => {
+        if (status === "success") {
+          if (data.status === "ok") {
+            // console.log(data.link);
+            refreshLink(data.link);
+          }
+        }
+      })
+    }
+
+    function createLink() {
+      let linkName = $("#link-name").val();
+      let link = {
+        linkName: linkName
+      };
+      $.get('/appApi/createLink', link, (data, status) => {
+        if (status === "success") {
+          if (data.status === "ok") {
+            getLink();
+            $("#link-name").val('');
+          }
+        }
+      })
+    }
+
+    function sendStatus(status) {
+      let link = {
+        clientID: status[0],
+        action: status[1]
+      }
+      $.get('/appApi/sendStatus', link, (data, status) => {
+        if (status === "success") {
+          if (data.status === "ok") {
+            console.log('ok')
+          }
+        }
+      })
+    };
+
+    $(document).ready(function () {
+      setInterval(getLink, 1500)
+    })
+
+    // $(document).ready(function () {
+    //   setInterval(function () {
+    //     $.get('/appApi/getStatus', {}, (data, status) => {
+    //       if (status = "success") {
+    //         if (data.status = "ok") {
+    //           // let newData = JSON.stringify(data.msg);
+    //           let newData = data.lockstatus.lockstatus;
+    //           let oldData = $('#lock-status').val();
+    //           if (newData !== oldData) {
+    //             $("#lock-status").empty();
+    //             $("#lock-status").append('Lock is ' + newData + ' now');
+    //             if (newData === 'open') {
+    //               $('#open').prop('disabled', true);
+    //               $('#close').prop('disabled', '');
+    //             } else if (newData === 'close') {
+    //               $('#close').prop('disabled', true);
+    //               $('#open').prop('disabled', '');
+    //             } else {
+    //               $('#close').prop('enabled', '');
+    //               $('#open').prop('enabled', '');
+    //             }
+    //           }
+    //         }
+    //       };
+    //     });
+    //   }, 2000);
+    // });
+  </script>
+
+  <body>
+    <div>
+      <h2>Create Link</h2>
+      <div>
+        Link Name :
+        <input type="text" name="Link Name" id="link-name" value="">
+        <button type="button" id="link-create" onclick="createLink()">Create a Link</button>
+      </div>
+      <!-- <button type="button" id="link-create" onclick="">Create a Link</button> -->
+      <!-- <button id="open" type="button" onclick="sendStatus('open')">Open Door</button>
+        <button id="close" type="button" onclick="sendStatus('close')">Close Door</button> -->
+    </div>
+    <div id="div1">
+      <h2>Control Locks by Link :</h2>
+      <table id="link-table" align="left">
+        <tr>
+          <th>Link Name</th>
+          <th colspan="2">Link Action</th>
+        </tr>
+      </table>
+    </div>
+    <div id="div2">
+      <h2>Lock Status :</h2>
+      <table id="lockstatus-table">
+        <tr>
+          <th>Control by</th>
+          <th colspan="1">Lock Status</th>
+        </tr>
+      </table>
+    </div>
+    <div id="div3">
+      <h2>Control Locks by Mobile App :</h2>
+      <table id="app-link-table">
+        <tr>
+          <th>Link Name</th>
+          <th colspan="2">Link Action</th>
+        </tr>
+        <!-- <tr>
+          <td>
+            <select id="link-select"></select>
+          </td>
+        </tr> -->
+      </table>
+    </div>
+  </body>
+</head>
+
+</html>

@@ -1,0 +1,10 @@
+{
+  "PORT_APP": 8787,
+  "IOT_INFO": {
+    "KEY_PATH": "private.pem.key",
+		"CERT_PATH": "certificate.pem.crt",
+    "CA_PATH": "root-CA.crt",
+    "HOST": "xxxxxxxxxxx.iot.us-east-2.amazonaws.com"
+  }
+}
+
